@@ -1,1 +1,3 @@
 .env
+difficulties/
+__pycache__/
