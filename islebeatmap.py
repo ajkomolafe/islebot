@@ -44,17 +44,36 @@ class Beatmap():
                 rosu_difficulty = rosu.Beatmap(content = file.read()) #doesn't have to be converted as mode is already in the file
 
             #cache these using mongodb, as well as w mods etc
-            rosu_perf = rosu.Performance(accuracy = 100)
-            self.acc_100 = rosu_perf.calculate(rosu_difficulty).pp
+            #values can be improved but its fine for now
+            max_geki = difficulty.count_circles + difficulty.count_sliders
+            diff_calc = rosu.Performance(accuracy = 100,
+                                         n_geki=max_geki,
+                                         lazer=False).calculate(rosu_difficulty)
 
+            rosu_perf = rosu.Performance(accuracy = 100, n_geki=max_geki, lazer=False)
+            self.acc_max = rosu_perf.calculate(rosu_difficulty).pp
+
+            rosu_perf.set_n_geki((max_geki * 3) // 4) # 3:1 ratio for max to 300
+            
             rosu_perf.set_accuracy(99)
             self.acc_99 = rosu_perf.calculate(rosu_difficulty).pp
 
-            rosu_perf.set_accuracy(97)
-            self.acc_97 = rosu_perf.calculate(rosu_difficulty).pp
+            rosu_perf.set_accuracy(98)
+            self.acc_98 = rosu_perf.calculate(rosu_difficulty).pp
 
             rosu_perf.set_accuracy(95)
             self.acc_95 = rosu_perf.calculate(rosu_difficulty).pp
+            
+            self.sr = diff_calc.difficulty.stars
+            self.ar = rosu_difficulty.ar
+            self.od = rosu_difficulty.od
+            self.hp = rosu_difficulty.hp
+            self.ar = rosu_difficulty.ar
+            self.hit_length = difficulty.hit_length
+            self.total_length = difficulty.total_length
+
+            # print(diff_calc.difficulty)
+            # print(diff_calc)
 
         except Exception as e:
             raise e
