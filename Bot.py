@@ -2,7 +2,7 @@ import os
 import irc.bot
 from dotenv import load_dotenv
 import re
-import islebeatmap
+import Beatmap
 
 class IsleBot(irc.bot.SingleServerIRCBot):
     def __init__(self, username, server, server_backup, port, password):
@@ -61,23 +61,23 @@ class IsleBot(irc.bot.SingleServerIRCBot):
                     if "#osu/" in beatmapset_url:
                         hashtag_index = beatmapset_url.index('#osu/')
                         beatmap_id = int(beatmapset_url[hashtag_index+len("#osu/"):])
-                        beatmap = islebeatmap.Beatmap(beatmap_id)
+                        beatmap = Beatmap.Beatmap(beatmap_id)
                     if "#taiko/" in beatmapset_url:
                         hashtag_index = beatmapset_url.index('#taiko/')
                         beatmap_id = int(beatmapset_url[hashtag_index+len("#taiko/"):])
-                        beatmap = islebeatmap.Beatmap(beatmap_id)
+                        beatmap = Beatmap.Beatmap(beatmap_id)
                     if "#catch/" in beatmapset_url:
                         hashtag_index = beatmapset_url.index('#catch/')
                         beatmap_id = int(beatmapset_url[hashtag_index+len("#catch/"):])
-                        beatmap = islebeatmap.Beatmap(beatmap_id)
+                        beatmap = Beatmap.Beatmap(beatmap_id)
                     if "#mania/" in beatmapset_url:
                         hashtag_index = beatmapset_url.index('#mania/')
                         beatmap_id = int(beatmapset_url[hashtag_index+len("#mania/"):])
-                        beatmap = islebeatmap.Beatmap(beatmap_id)
+                        beatmap = Beatmap.Beatmap(beatmap_id)
                     if "#/" in beatmapset_url:
                         hashtag_index = beatmapset_url.index('#/')
                         beatmap_id = int(beatmapset_url[hashtag_index+len("#/"):])
-                        beatmap = islebeatmap.Beatmap(beatmap_id)
+                        beatmap = Beatmap.Beatmap(beatmap_id)
 
                     output_message = f"[{beatmapset_url} {beatmap.data.artist} - {beatmap.data.title} [{beatmap.version}]] | MAX: {beatmap.acc_max:.2f}pp | 99%: {beatmap.acc_99:.2f}pp | 98%: {beatmap.acc_98:.2f}pp | 95%: {beatmap.acc_95:.2f}pp ♥ {beatmap.total_length//60}:{beatmap.total_length%60} | {beatmap.sr:.2f}* | OD{beatmap.od:.1f}"
                     c.privmsg(e.source.nick, output_message)
@@ -89,12 +89,14 @@ class IsleBot(irc.bot.SingleServerIRCBot):
                 
             else: 
                 #Beatmapset only
-                beatmapset_url = beatmapset_url.replace("https://", '').replace("http://", '')
-                beatmapset_url = beatmapset_url.replace("osu.ppy.sh/", '')
-                beatmapset_url = beatmapset_url.replace("beatmapsets/", '')
+                beatmapset_id = beatmapset_url.replace("https://", '').replace("http://", '').replace("osu.ppy.sh/", '').replace("beatmapsets/", '')
+                beatmap = None
                 try:
-                    hashtag_index = beatmapset_url.index('#')
-                    beatmapset_url = beatmapset_url[:hashtag_index]
+                    beatmap = Beatmap.beatmapset_to_beatmap(int(beatmapset_id))
+
+                    output_message = f"[{beatmapset_url} {beatmap.data.artist} - {beatmap.data.title} [{beatmap.version}]] | MAX: {beatmap.acc_max:.2f}pp | 99%: {beatmap.acc_99:.2f}pp | 98%: {beatmap.acc_98:.2f}pp | 95%: {beatmap.acc_95:.2f}pp ♥ {beatmap.hit_length//60}:{beatmap.hit_length%60} | {beatmap.sr:.2f}* | OD{beatmap.od:.1f}"
+                    c.privmsg(e.source.nick, output_message)
+                    print(f"Message to {e.source.nick}: {output_message}")
                 except Exception:
                     print("Error: " + repr(e))
                     return

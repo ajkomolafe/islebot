@@ -26,10 +26,6 @@ class Beatmap():
 
         try:
             filename = "./difficulties/" + str(difficulty.id) + ".osu"
-            # try:
-            #     os.remove(filename)
-            # except OSError:
-            #     pass
 
             if not os.path.exists(filename): #dont overwrite if file has been downloaded, as they don't change
                 response = requests.get(difficulty_url)
@@ -65,12 +61,9 @@ class Beatmap():
             self.acc_95 = rosu_perf.calculate(rosu_difficulty).pp
             
             self.sr = diff_calc.difficulty.stars
-            self.ar = rosu_difficulty.ar
             self.od = rosu_difficulty.od
             self.hp = rosu_difficulty.hp
-            self.ar = rosu_difficulty.ar
             self.hit_length = difficulty.hit_length
-            self.total_length = difficulty.total_length
 
             # print(diff_calc.difficulty)
             # print(diff_calc)
@@ -79,12 +72,11 @@ class Beatmap():
             raise e
         
 
-def calculateBeatmapsetPerformances(beatmapset_id):
+def beatmapset_to_beatmap(beatmapset_id):
     difficulties = api.beatmapset(beatmapset_id).beatmaps
-    beatmap_list = []
+
+    highest_sr = max(difficulties, key=lambda x: x.difficulty_rating).difficulty_rating
 
     for difficulty in difficulties:
-        beatmap = Beatmap(difficulty.id)
-        beatmap_list.append(beatmap)
-
-    return beatmap_list
+        if difficulty.difficulty_rating == highest_sr:
+            return Beatmap(difficulty.id)
